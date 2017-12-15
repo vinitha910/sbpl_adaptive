@@ -13,6 +13,7 @@
 #include <sbpl_adaptive/core/search/adaptive_planner.h>
 #include <sbpl_adaptive/mrep/graph/multirep_adaptive_discrete_space.h>
 #include <sbpl_adaptive/mrep/heuristic/multirep_heuristic.h>
+#include <sbpl/discrete_space_information/environment_navxythetalat.h>
 
 namespace adim {
 
@@ -20,7 +21,11 @@ class ADMHAPlannerAllocator : public PlannerAllocator
 {
 public:
 
-    ADMHAPlannerAllocator(MultiRepHeuristic *aheur, MultiRepHeuristic **heurs, int h_count);
+    ADMHAPlannerAllocator(MultiRepHeuristic *aheur, 
+                          MultiRepHeuristic **heurs, 
+                          int h_count,
+                          EnvironmentNAVXYTHETALAT* proj_env = nullptr,
+                          std::map<std::pair<int,int>, int, EnvironmentNAVXYTHETALAT::centroid_comparator>* centroids = nullptr);
 
     SBPLPlanner *make(
         AdaptiveDiscreteSpace *space,
@@ -31,6 +36,8 @@ private:
     MultiRepHeuristic *aheur_;
     MultiRepHeuristic **heurs_;
     int h_count_;
+    EnvironmentNAVXYTHETALAT* proj_env_;
+    std::map<std::pair<int,int>, int, EnvironmentNAVXYTHETALAT::centroid_comparator>* centroids_;
 };
 
 class MHAPlanner_AD : public SBPLPlanner
@@ -41,7 +48,9 @@ public:
             MultiRepAdaptiveDiscreteSpace* space,
             MultiRepHeuristic* hanchor,
             MultiRepHeuristic** heurs,
-            int hcount);
+            int hcount,
+            EnvironmentNAVXYTHETALAT* proj_env = nullptr,
+            std::map<std::pair<int,int>, int, EnvironmentNAVXYTHETALAT::centroid_comparator>* centroids = nullptr);
 
     virtual ~MHAPlanner_AD();
 
@@ -145,6 +154,8 @@ private:
     MultiRepHeuristic* m_hanchor;
     MultiRepHeuristic** m_heurs;
     int m_hcount;           ///< number of additional heuristics used
+    EnvironmentNAVXYTHETALAT* m_proj_env;
+    std::map<std::pair<int,int>, int, EnvironmentNAVXYTHETALAT::centroid_comparator>* m_centroids;
 
     ReplanParams m_params;
     double m_initial_eps_mha;

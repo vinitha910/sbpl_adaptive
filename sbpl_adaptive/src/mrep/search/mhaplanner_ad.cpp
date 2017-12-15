@@ -22,11 +22,15 @@ static const char *SSLOG = "mrmha.successors";
 ADMHAPlannerAllocator::ADMHAPlannerAllocator(
     MultiRepHeuristic *aheur,
     MultiRepHeuristic **heurs,
-    int h_count)
+    int h_count,
+    EnvironmentNAVXYTHETALAT* proj_env,
+    std::map<std::pair<int,int>, int, EnvironmentNAVXYTHETALAT::centroid_comparator>* centroids)
 :
     aheur_(aheur),
     heurs_(heurs),
-    h_count_(h_count)
+    h_count_(h_count),
+    proj_env_(proj_env),
+    centroids_(centroids)
 {
 }
 
@@ -41,14 +45,16 @@ SBPLPlanner *ADMHAPlannerAllocator::make(
         return nullptr;
     }
 
-    return new MHAPlanner_AD(mrep_space, aheur_, heurs_, h_count_);
+    return new MHAPlanner_AD(mrep_space, aheur_, heurs_, h_count_, proj_env_, centroids_);
 }
 
 MHAPlanner_AD::MHAPlanner_AD(
     MultiRepAdaptiveDiscreteSpace* space,
     MultiRepHeuristic* hanchor,
     MultiRepHeuristic** heurs,
-    int hcount)
+    int hcount,
+    EnvironmentNAVXYTHETALAT* proj_env,
+    std::map<std::pair<int,int>, int, EnvironmentNAVXYTHETALAT::centroid_comparator>* centroids)
 :
     SBPLPlanner(),
 //    environment_(environment),
@@ -56,11 +62,13 @@ MHAPlanner_AD::MHAPlanner_AD(
     m_hanchor(hanchor),
     m_heurs(heurs),
     m_hcount(hcount),
+    m_proj_env(proj_env),
+    m_centroids(centroids),
     m_params(0.0),
-    m_initial_eps_mha(100.0),
+    m_initial_eps_mha(10.0),
     m_max_expansions(0),
-    m_eps(1.0),
-    m_eps_mha(1.0),
+    m_eps(100.0),
+    m_eps_mha(10.0),
     m_eps_satisfied((double)INFINITECOST),
     m_num_expansions(0),
     m_elapsed(sbpl::clock::duration::zero()),
@@ -653,11 +661,16 @@ void MHAPlanner_AD::expand(MHASearchState* state, int hidx)
 
     std::vector<int> succ_ids;
     std::vector<int> costs;
+    //std::vector<int> succ_sig;
+    std::pair<int, std::vector<int> > u;
     space_->GetSuccs(state->state_id, &succ_ids, &costs);
     assert(succ_ids.size() == costs.size());
 
     for (size_t sidx = 0; sidx < succ_ids.size(); ++sidx)  {
         const int cost = costs[sidx];
+        //u = std::make_pair(state->state_id, state->sig);
+        //m_proj_env->Signature(u, succ_ids[sidx], *m_proj_env, *m_centroids, succ_sig);
+
         MHASearchState* succ_state = get_state(succ_ids[sidx]);
         reinit_state(succ_state);
 
@@ -711,8 +724,7 @@ int MHAPlanner_AD::compute_heuristic(int state_id, int hidx)
         int h = m_hanchor->GetGoalHeuristic(state_id);
         ROS_DEBUG_NAMED(SLOG, "h(%d, %d) = %d", state_id, hidx, h);
         return h;
-    }
-    else {
+    } else {
         int h = m_heurs[hidx - 1]->GetGoalHeuristic(state_id);
         ROS_DEBUG_NAMED(SLOG, "h(%d, %d) = %d", state_id, hidx, h);
         return h;

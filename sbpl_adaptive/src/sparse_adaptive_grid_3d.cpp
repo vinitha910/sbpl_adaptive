@@ -403,30 +403,33 @@ visualization_msgs::MarkerArray SparseAdaptiveGrid3D::getAdaptiveGridVisualizati
                 std_msgs::ColorRGBA c;
                 leatherman::msgHSVToRGB(hue, 1.0, 1.0, c);
                 // additive color per dimension
-                col.r += c.r;
-                col.g += c.g;
-                col.b += c.b;
-
+                // col.r += c.r;
+                // col.g += c.g;
+                // col.b += c.b;
+                col.r = 122.0/255.0;
+                col.g = 122.0/255.0;
+                col.b = 122.0/255.0;
+                col.a = 0.8;    
             }
         }
 
         // normalize color
-        float mc = col.r;
-        mc = std::max(mc, col.g);
-        mc = std::max(mc, col.b);
-        if (mc == 0.0f) { // skip black (no dim) cells
-            col.r = 0.4;
-            col.g = 0.4;
-            col.b = 0.4;
-            col.a = 0.2;
-            return; // uncomment me if you'd like some freespace prints
-        } else {
-            float minv = 1.0 / mc;
-            col.r *= minv;
-            col.g *= minv;
-            col.b *= minv;
-            col.a = 1.0f;
-        }
+        // float mc = col.r;
+        // mc = std::max(mc, col.g);
+        // mc = std::max(mc, col.b);
+        // if (mc == 0.0f) { // skip black (no dim) cells
+        //     col.r = 0.4;
+        //     col.g = 0.4;
+        //     col.b = 0.4;
+        //     col.a = 0.2;
+        //     return; // uncomment me if you'd like some freespace prints
+        // } else {
+        //     float minv = 1.0 / mc;
+        //     col.r *= minv;
+        //     col.g *= minv;
+        //     col.b *= minv;
+        //     col.a = 1.0f;
+        // }
 
         geometry_msgs::Point p;
         p.x = 0.5 * (wx_from + wx_to) - 0.5 * oc_grid_->resolution();

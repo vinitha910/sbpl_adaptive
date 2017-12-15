@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <memory>
 #include <stdexcept>
+#include <vector>
 
 // system includes
 #include <smpl/forward.h>
@@ -109,6 +110,17 @@ size_t intHash(size_t key)
   key += (key << 7);
   key ^= (key >> 12);
   return key;
+}
+
+inline 
+size_t vectorHash(std::vector<int> v)
+{
+  std::hash<int> hasher;
+  size_t seed = 0;
+  for (int i : v) {
+    seed ^= hasher(i) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+  }
+  return seed;
 }
 
 inline
